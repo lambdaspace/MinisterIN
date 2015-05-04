@@ -1,0 +1,26 @@
+{
+  "name": "MinisterIN",
+  "description": "Notification service of the space status.",
+  "version": "0.1.0",
+  "maintainers": [
+    {
+      "name": "Marios Isaakidis",
+      "email": "misaakidis@yahoo.gr",
+      "web": "https://github.com/misaakidis"
+    }
+  ],
+  "dependencies": {
+  },
+  "repository": [
+    {
+      "type": "git",
+      "url": "https://github.com/techministry/MinisterIN.git"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "GPL v3",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.html"
+    }
+  ]
+}
