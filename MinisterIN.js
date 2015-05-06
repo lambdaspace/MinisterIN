@@ -3,10 +3,10 @@ var http = require('http');
 var Twitter = require('twitter');
 
 /**
- * Milliseconds before retrying to update the space status (=10 mins)
+ * Milliseconds before retrying to update the space status (=5 mins)
  * @type {number}
  */
-const UPDATE_INTERVAL = 600000;
+const UPDATE_INTERVAL = 300000;
 
 var numOfHackers;
 var spaceOpen = false;
@@ -26,11 +26,11 @@ var twitterClient = new Twitter({
 /**
  * Tweet the status of the space
  *
- * @param spaceOpen true if the space is open,
+ * @param newStatus true if the space is open,
  * false if the space is closed.
  */
-var tweetStatus = function(spaceOpen) {
-    var tweetMsg = (spaceOpen)
+var tweetSpaceOpened = function(newStatus) {
+    var tweetMsg = (newStatus)
         ? "Minister is in, the door is open."
         : "Minister is out, the space is closed." ;
 
@@ -40,6 +40,9 @@ var tweetStatus = function(spaceOpen) {
             console.log(response);  // Raw response object.
         } else {
             console.log("Successfully tweeted: " + tweet);
+            // Update the status of the spaceOpen variable only after the status
+            // got successfully tweeted
+            spaceOpen = newStatus;
         }
     });
 };
@@ -60,18 +63,16 @@ updateStatus = function(numOfHackers) {
     }
 
     if (spaceOpen) {
-        // If space was open and there are no hackers anymore
         if (numOfHackers == 0) {
-            spaceOpen = false;
+            // If space status was open and there are no hackers anymore
             console.log("Space is empty.");
-            tweetStatus(spaceOpen);
+            tweetSpaceOpened(false);
         }
     } else {
-        // If space was closed and there are hackers now
         if (numOfHackers > 0) {
-            spaceOpen = true;
+            // If space was closed and there are hackers now
             console.log("Space is open!")
-            tweetStatus(spaceOpen);
+            tweetSpaceOpened(true);
         }
     }
 };
