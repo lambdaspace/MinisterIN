@@ -1,15 +1,33 @@
 // Include needed node.js modules
+var fs = require('fs');
 var http = require('http');
 var Twitter = require('twitter');
 
+
 /**
- * Milliseconds before retrying to update the space status (=5 mins)
+ * Milliseconds before retrying to update the space status (=10 mins)
  * @type {number}
  */
-const UPDATE_INTERVAL = 300000;
+const UPDATE_INTERVAL = 600000;
 
 var numOfHackers;
 var spaceOpen = false;
+
+// Read tweet messages from the tweets.json file
+var tweetMsgs;
+try {
+    tweetMsgs = JSON.parse(fs.readFileSync("tweets.json"));
+} catch (ex) {
+    console.log('Could not parse tweets file: ' + ex.message);
+    tweetMsgs = {
+        'statusOpen': [
+            "Minister is in"
+        ],
+        'statusClosed': [
+            "Minister is out"
+        ]
+    }
+}
 
 
 // Create an object with the twitter keys and access tokens
@@ -30,16 +48,22 @@ var twitterClient = new Twitter({
  * false if the space is closed.
  */
 var tweetSpaceOpened = function(newStatus) {
-    var tweetMsg = (newStatus)
-        ? "Minister is in, the door is open."
-        : "Minister is out, the space is closed." ;
+    var tweetMsg;
+    var rand;
+    if (newStatus) {
+        rand = Math.floor(Math.random() * tweetMsgs.statusOpen.length);
+        tweetMsg = tweetMsgs.statusOpen[rand] + ' - Space: OPEN';
+    } else {
+        rand = Math.floor(Math.random() * tweetMsgs.statusClosed.length);
+        tweetMsg = tweetMsgs.statusClosed[rand] + ' - Space: CLOSED';
+    }
 
     twitterClient.post('statuses/update', {status: tweetMsg},  function(error, tweet, response){
         if(error) {
-            console.log("Could not tweet: " + tweet);  // Tweet body.
+            console.log('Could not tweet: ' + tweet);  // Tweet body.
             console.log(response);  // Raw response object.
         } else {
-            console.log("Successfully tweeted: " + tweet);
+            console.log('Successfully tweeted: ' + tweet);
             // Update the status of the spaceOpen variable only after the status
             // got successfully tweeted
             spaceOpen = newStatus;
@@ -65,13 +89,13 @@ updateStatus = function(numOfHackers) {
     if (spaceOpen) {
         if (numOfHackers == 0) {
             // If space status was open and there are no hackers anymore
-            console.log("Space is empty.");
+            console.log('Space is empty.');
             tweetSpaceOpened(false);
         }
     } else {
         if (numOfHackers > 0) {
             // If space was closed and there are hackers now
-            console.log("Space is open!")
+            console.log('Space is open!');
             tweetSpaceOpened(true);
         }
     }
