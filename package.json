@@ -1,7 +1,7 @@
 {
   "name": "MinisterIN",
-  "description": "Notification service of the space status.",
-  "version": "1.0.0",
+  "description": "Notification service of the hackerspace status.",
+  "version": "1.1.0",
   "maintainers": [
     {
       "name": "Marios Isaakidis",
@@ -10,7 +10,8 @@
     }
   ],
   "dependencies": {
-    "twitter": "latest"
+    "twitter": "latest",
+    "irc": "latest"
   },
   "repository": [
     {

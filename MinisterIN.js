@@ -2,6 +2,7 @@
 var fs = require('fs');
 var http = require('http');
 var Twitter = require('twitter');
+var irc = require('irc');
 
 
 /**
@@ -17,8 +18,8 @@ var spaceOpen = false;
 var tweetMsgs;
 try {
     tweetMsgs = JSON.parse(fs.readFileSync("tweets.json"));
-} catch (ex) {
-    console.log('Could not parse tweets file: ' + ex.message);
+} catch (e) {
+    console.log('Could not parse tweets file: ' + e.message);
     tweetMsgs = {
         'statusOpen': [
             "Minister is in"
@@ -40,6 +41,22 @@ var twitterClient = new Twitter({
     access_token_key: twitterKeys.access_token_key,
     access_token_secret: twitterKeys.access_token_secret
 });
+
+// Read IRC configuration file
+var ircConfig;
+try {
+    ircConfig = JSON.parse(fs.readFileSync("irc_config.json"));
+} catch (e) {
+    console.log('Could not parse IRC configuration file: ' + e.message);
+    ircConfig = {
+        server: "irc.freenode.net",
+        nick: "ConsuelaTM",
+        channels: ["#TechMinistry"]
+    }
+}
+
+// Create an IRC client
+var ircClient = new irc.Client(ircConfig.server, ircConfig.nick, ircConfig);
 
 /**
  * Tweet the status of the space
@@ -63,7 +80,10 @@ var tweetSpaceOpened = function(newStatus) {
             console.log('Could not tweet: ' + tweet);  // Tweet body.
             console.log(response);  // Raw response object.
         } else {
+            // IRC bot says the random message in the channel
+            ircClient.say(ircConfig.channels[0], tweetMsg);
             console.log('Successfully tweeted: ' + tweet);
+
             // Update the status of the spaceOpen variable only after the status
             // got successfully tweeted
             spaceOpen = newStatus;
