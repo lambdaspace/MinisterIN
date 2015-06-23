@@ -134,5 +134,10 @@ getCallback = function(response) {
 
 // Set intervals for requesting the hackers.txt file
 var updateInterval = setInterval(function() {
-    http.request(getOptions, getCallback).end();
+    var req = http.request(getOptions, getCallback);
+    
+    req.on('error', function(e) {
+        console.log('Error while GETting hackers.txt: ' + e.message);
+    });
+
 }, UPDATE_INTERVAL);
