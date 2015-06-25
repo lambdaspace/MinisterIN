@@ -160,4 +160,5 @@ var updateInterval = setInterval(function() {
         console.log('Error while GETting hackers.txt: ' + e.message);
     });
 
+    req.end();
 }, UPDATE_INTERVAL);
