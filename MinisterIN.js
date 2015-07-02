@@ -14,6 +14,24 @@ const UPDATE_INTERVAL = 600000;
 var numOfHackers;
 var spaceOpen = false;
 
+// Check if "space=open" was given as argument
+process.argv.slice(2).forEach(function (val, index, array) {
+  switch (val) {
+    case 'space=open':
+      spaceOpen = true;
+    case 'space=closed':
+      break;
+    case '-h':
+    case '--help':
+    default:
+      console.log('Usage: node MinisterIN.js [options]\n');
+      console.log('Options:');
+      console.log('  space=[open, closed]\tset the current space status (default = closed)');
+      console.log('  -h, --help\t\tprint this message');
+      process.exit(code=0);
+  }
+});
+
 // Read tweet messages from the tweets.json file
 var tweetMsgs;
 try {
@@ -99,7 +117,7 @@ var tweetSpaceOpened = function(newStatus) {
  * @param numOfHackers the number of hackers in space. or NaN
  * in case there was an error while parsing the hackers.txt file.
  */
-updateStatus = function(numOfHackers) {
+var updateStatus = function(numOfHackers) {
     // If hackers.txt could not be parsed
     if (isNaN(numOfHackers)) {
         console.log('Could not parse hackers.txt file.');
@@ -137,7 +155,7 @@ var getOptions = {
  *
  * @param response the response of the GET request
  */
-getCallback = function(response) {
+var getCallback = function(response) {
     var str = '';
     response.on('data', function (chunk) {
         str += chunk;
@@ -155,7 +173,7 @@ getCallback = function(response) {
 // Set intervals for requesting the hackers.txt file
 var updateInterval = setInterval(function() {
     var req = http.request(getOptions, getCallback);
-    
+
     req.on('error', function(e) {
         console.log('Error while GETting hackers.txt: ' + e.message);
     });
