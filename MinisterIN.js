@@ -222,7 +222,9 @@ http.createServer(function (req, res) {
 }).listen(7777);
 
 gh_webhook_handler.on('*', function (event) {
-  ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
+  if (event.payload.repository.name !== 'undefined') {
+    ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
+  }
 });
 
 gh_webhook_handler.on('error', function (err) {
