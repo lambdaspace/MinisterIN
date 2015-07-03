@@ -213,7 +213,7 @@ ircClient.addListener('message#TechMinistry', function(from, message){
 })
 
 // Github organization Webhooks
-var gh_webhook_handler = gh_webhook({'path': '/techministry'}, 'secret': 'secret');
+var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': 'secret'});
 http.createServer(function (req, res) {
   gh_webhook_handler(req, res, function (err) {
     res.statusCode = 404;
