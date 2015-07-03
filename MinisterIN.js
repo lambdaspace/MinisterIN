@@ -195,11 +195,11 @@ ircClient.addListener('message#TechMinistry', function(from, message){
     } else if (status.indexOf(msg[i]) > -1) {
       containStatus = true;
     }
-    if (containsName & containStatus) {
+    if (containsName && containStatus) {
       break;
     }
   }
-  if (containsName & containStatus) {
+  if (containsName && containStatus) {
     if (numOfHackers == 0) {
       ircClient.say(ircConfig.channels[0], from + ', sorry space is closed');
     } else if (numOfHackers == 1) {
