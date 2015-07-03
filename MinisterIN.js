@@ -213,7 +213,7 @@ ircClient.addListener('message#TechMinistry', function(from, message){
 })
 
 // Github organization Webhooks
-var gh_webhook_handler = gh_webhook({'path': '/techministry'}, 'secret': 'secret');
+var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': 'secret'});
 http.createServer(function (req, res) {
   gh_webhook_handler(req, res, function (err) {
     res.statusCode = 404;
@@ -222,7 +222,9 @@ http.createServer(function (req, res) {
 }).listen(7777);
 
 gh_webhook_handler.on('*', function (event) {
-  ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
+  if (event.payload.repository.name !== 'undefined') {
+    ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
+  }
 });
 
 gh_webhook_handler.on('error', function (err) {
