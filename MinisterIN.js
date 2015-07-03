@@ -3,7 +3,7 @@ var fs = require('fs');
 var http = require('http');
 var Twitter = require('twitter');
 var irc = require('irc');
-
+var gh_webhook = require('github-webhook-handler');
 
 /**
  * Milliseconds before retrying to update the space status (=10 mins)
@@ -211,3 +211,20 @@ ircClient.addListener('message#TechMinistry', function(from, message){
     }
   }
 })
+
+// Github organization Webhooks
+var gh_webhook_handler = gh_webhook({'path': '/techministry'}, 'secret': 'secret');
+http.createServer(function (req, res) {
+  gh_webhook_handler(req, res, function (err) {
+    res.statusCode = 404;
+    res.end('No such location');
+  })
+}).listen(7777);
+
+gh_webhook_handler.on('*', function (event) {
+  ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
+});
+
+gh_webhook_handler.on('error', function (err) {
+  console.error('Github Webhook error:', err.message);
+});

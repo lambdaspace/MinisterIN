@@ -11,7 +11,8 @@
   ],
   "dependencies": {
     "twitter": "latest",
-    "irc": "latest"
+    "irc": "latest",
+    "github-webhook-handler": "latest"
   },
   "repository": [
     {
