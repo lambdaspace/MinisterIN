@@ -186,7 +186,7 @@ ircClient.addListener('message#TechMinistry', function(from, message){
   var msg = message.toLowerCase().split(" ");
   var containsName = false;
   var containStatus = false;
-  var names = ["consuelatm", "consuelatm,", "consuelatm:", "consuela", "consuela,", "consuela:", "κονσουέλα", "κονσουελα", "κονσουέλα,", "κονσουελα,", "κονσουέλα:", "κονσουελα:", "κονσθελα"];
+  var names = ["consuelatm", "consuelatm,", "consuelatm:", "consuela", "consuela,", "consuela:", "κονσουέλα", "κονσουελα", "κονσουέλα,", "κονσουελα,", "κονσουέλα:", "κονσουελα:", "ψονσθελα"];
   var status = ["status", "στάτους", "στατους", "στατθσ", "στατυς", "katastasi", "katastash", "στάτυς", "κατάσταση", "κατασταση",
 "anoixtos", "anixtos", "ανοιχτός", "ανοιχτος", "xwros", "xoros", "χωρος", "χώρος"];
   for (var i = 0; i < msg.length; i++) {
