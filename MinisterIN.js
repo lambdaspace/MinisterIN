@@ -3,6 +3,7 @@ var fs = require('fs');
 var http = require('http');
 var Twitter = require('twitter');
 var irc = require('irc');
+var bot = require('./ircbot');
 var gh_webhook = require('github-webhook-handler');
 
 /**
@@ -182,33 +183,13 @@ var updateInterval = setInterval(function() {
 }, UPDATE_INTERVAL);
 
 // Reply with the status of TechMinistry when someone says "ConsuelaTM, status"
-ircClient.addListener('message#TechMinistry', function(from, message){
-  var msg = message.toLowerCase().split(" ");
-  var containsName = false;
-  var containStatus = false;
-  var names = ["consuelatm", "consuelatm,", "consuelatm:", "consuela", "consuela,", "consuela:", "κονσουέλα", "κονσουελα", "κονσουέλα,", "κονσουελα,", "κονσουέλα:", "κονσουελα:", "ψονσθελα"];
-  var status = ["status", "στάτους", "στατους", "στατθσ", "στατυς", "katastasi", "katastash", "στάτυς", "κατάσταση", "κατασταση",
-"anoixtos", "anixtos", "ανοιχτός", "ανοιχτος", "xwros", "xoros", "χωρος", "χώρος"];
-  for (var i = 0; i < msg.length; i++) {
-    if (names.indexOf(msg[i]) > -1) {
-      containsName = true;
-    } else if (status.indexOf(msg[i]) > -1) {
-      containStatus = true;
-    }
-    if (containsName && containStatus) {
-      break;
-    }
+ircClient.addListener('message#TechMinistry', function(from, message) {
+  var reply = bot.containsNameAndStatus(message, numOfHackers)
+  if (reply !== 'undefinded') {
+    ircClient.say(ircConfig.channels[0], from + reply)
   }
-  if (containsName && containStatus) {
-    if (numOfHackers == 0) {
-      ircClient.say(ircConfig.channels[0], from + ', sorry space is closed');
-    } else if (numOfHackers == 1) {
-      ircClient.say(ircConfig.channels[0], from + ', there is one hacker at the moment');
-    } else if (numOfHackers > 1) {
-      ircClient.say(ircConfig.channels[0], from + ', there are ' + numOfHackers + ' hackers at the moment');
-    } else {
-      ircClient.say(ircConfig.channels[0], from + ', sorry I couldn\'t get the information you asked for, please try again in a few minutes');
-    }
+  else {
+    console.log('Error while getting return message')
   }
 })
 
