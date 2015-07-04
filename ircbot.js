@@ -15,17 +15,16 @@ module.exports = {
         containStatus = true;
       }
       if (containsName && containStatus) {
-        break;
+        if (numOfHackers == 0) {
+          return ', sorry space is closed'
+        } else if (numOfHackers == 1) {
+          return ', there is one hacker at the moment'
+        } else if (numOfHackers > 1) {
+          return ', there are ' + numOfHackers + ' hackers at the moment'
+        } else {
+          return ', sorry I couldn\'t get the information you asked for, please try again in a few minutes'
+        }
       }
-    }
-    if (numOfHackers == 0) {
-      return ', sorry space is closed'
-    } else if (numOfHackers == 1) {
-      return ', there is one hacker at the moment'
-    } else if (numOfHackers > 1) {
-      return ', there are ' + numOfHackers + ' hackers at the moment'
-    } else {
-      return ', sorry I couldn\'t get the information you asked for, please try again in a few minutes'
     }
   }
 };

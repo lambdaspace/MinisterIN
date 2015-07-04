@@ -185,11 +185,8 @@ var updateInterval = setInterval(function() {
 // Reply with the status of TechMinistry when someone says "ConsuelaTM, status"
 ircClient.addListener('message#TechMinistry', function(from, message) {
   var reply = bot.containsNameAndStatus(message, numOfHackers)
-  if (reply !== 'undefinded') {
+  if (reply !== undefined) {
     ircClient.say(ircConfig.channels[0], from + reply)
-  }
-  else {
-    console.log('Error while getting return message')
   }
 })
 
@@ -203,7 +200,7 @@ http.createServer(function (req, res) {
 }).listen(7777);
 
 gh_webhook_handler.on('*', function (event) {
-  if (event.payload.repository.name !== 'undefined') {
+  if (event.payload.repository.name !== undefined) {
     ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
   }
 });
