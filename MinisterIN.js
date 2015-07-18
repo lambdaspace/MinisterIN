@@ -184,7 +184,7 @@ var updateInterval = setInterval(function() {
 
 // Reply with the status of TechMinistry when someone says "ConsuelaTM, status"
 ircClient.addListener('message#TechMinistry', function(from, message) {
-  var reply = bot.containsNameAndStatus(message, numOfHackers)
+  var reply = bot.containsNameAndStatus(message, numOfHackers, tweetMsgs)
   if (reply !== undefined) {
     ircClient.say(ircConfig.channels[0], from + reply)
   }
