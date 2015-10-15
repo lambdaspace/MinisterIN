@@ -2,7 +2,9 @@
 var fs = require('fs');
 var http = require('http');
 var Twitter = require('twitter');
-
+var irc = require('irc');
+var bot = require('./ircbot');
+var gh_webhook = require('github-webhook-handler');
 
 /**
  * Milliseconds before retrying to update the space status (=10 mins)
@@ -10,15 +12,33 @@ var Twitter = require('twitter');
  */
 const UPDATE_INTERVAL = 600000;
 
-var numOfHackers;
+var numOfHackers = -1;
 var spaceOpen = false;
+
+// Check if "space=open" was given as argument
+process.argv.slice(2).forEach(function (val, index, array) {
+  switch (val) {
+    case 'space=open':
+      spaceOpen = true;
+    case 'space=closed':
+      break;
+    case '-h':
+    case '--help':
+    default:
+      console.log('Usage: node MinisterIN.js [options]\n');
+      console.log('Options:');
+      console.log('  space=[open, closed]\tset the current space status (default = closed)');
+      console.log('  -h, --help\t\tprint this message');
+      process.exit(code=0);
+  }
+});
 
 // Read tweet messages from the tweets.json file
 var tweetMsgs;
 try {
     tweetMsgs = JSON.parse(fs.readFileSync("tweets.json"));
-} catch (ex) {
-    console.log('Could not parse tweets file: ' + ex.message);
+} catch (e) {
+    console.log('Could not parse tweets file: ' + e.message);
     tweetMsgs = {
         'statusOpen': [
             "Minister is in"
@@ -40,6 +60,22 @@ var twitterClient = new Twitter({
     access_token_key: twitterKeys.access_token_key,
     access_token_secret: twitterKeys.access_token_secret
 });
+
+// Read IRC configuration file
+var ircConfig;
+try {
+    ircConfig = JSON.parse(fs.readFileSync("irc_config.json"));
+} catch (e) {
+    console.log('Could not parse IRC configuration file: ' + e.message);
+    ircConfig = {
+        server: "irc.freenode.net",
+        nick: "ConsuelaTM",
+        channels: ["#TechMinistry"]
+    }
+}
+
+// Create an IRC client
+var ircClient = new irc.Client(ircConfig.server, ircConfig.nick, ircConfig);
 
 /**
  * Tweet the status of the space
@@ -63,7 +99,10 @@ var tweetSpaceOpened = function(newStatus) {
             console.log('Could not tweet: ' + tweet);  // Tweet body.
             console.log(response);  // Raw response object.
         } else {
+            // IRC bot says the random message in the channel
+            ircClient.say(ircConfig.channels[0], tweetMsg);
             console.log('Successfully tweeted: ' + tweet);
+
             // Update the status of the spaceOpen variable only after the status
             // got successfully tweeted
             spaceOpen = newStatus;
@@ -79,7 +118,7 @@ var tweetSpaceOpened = function(newStatus) {
  * @param numOfHackers the number of hackers in space. or NaN
  * in case there was an error while parsing the hackers.txt file.
  */
-updateStatus = function(numOfHackers) {
+var updateStatus = function(numOfHackers) {
     // If hackers.txt could not be parsed
     if (isNaN(numOfHackers)) {
         console.log('Could not parse hackers.txt file.');
@@ -117,7 +156,7 @@ var getOptions = {
  *
  * @param response the response of the GET request
  */
-getCallback = function(response) {
+var getCallback = function(response) {
     var str = '';
     response.on('data', function (chunk) {
         str += chunk;
@@ -134,5 +173,38 @@ getCallback = function(response) {
 
 // Set intervals for requesting the hackers.txt file
 var updateInterval = setInterval(function() {
-    http.request(getOptions, getCallback).end();
+    var req = http.request(getOptions, getCallback);
+
+    req.on('error', function(e) {
+        console.log('Error while GETting hackers.txt: ' + e.message);
+    });
+
+    req.end();
 }, UPDATE_INTERVAL);
+
+// Reply with the status of TechMinistry when someone says "ConsuelaTM, status"
+ircClient.addListener('message#TechMinistry', function(from, message) {
+  var reply = bot.containsNameAndStatus(message, numOfHackers, tweetMsgs)
+  if (reply !== undefined) {
+    ircClient.say(ircConfig.channels[0], from + reply)
+  }
+})
+
+// Github organization Webhooks
+var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': 'secret'});
+http.createServer(function (req, res) {
+  gh_webhook_handler(req, res, function (err) {
+    res.statusCode = 404;
+    res.end('No such location');
+  })
+}).listen(7777);
+
+gh_webhook_handler.on('*', function (event) {
+  if (event.payload.repository.name !== undefined) {
+    ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
+  }
+});
+
+gh_webhook_handler.on('error', function (err) {
+  console.error('Github Webhook error:', err.message);
+});
