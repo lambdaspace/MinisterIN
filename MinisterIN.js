@@ -5,6 +5,7 @@ var Twitter = require('twitter');
 var irc = require('irc');
 var bot = require('./ircbot');
 var gh_webhook = require('github-webhook-handler');
+var program = require('commander');
 
 /**
  * Milliseconds before retrying to update the space status (=10 mins)
@@ -15,23 +16,23 @@ const UPDATE_INTERVAL = 600000;
 var numOfHackers = -1;
 var spaceOpen = false;
 
+/**
+ * Convert any provided argument to its string representation.
+ * @param arg - Any argument
+ * @return the string form of the provided argument
+ */
+function string(arg) {
+    return '' + arg;
+}
+
+program
+    .version('0.0.1')
+    .usage('space=[open/closed]')
+    .option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', string, 'closed')
+    .parse(process.argv);
+
 // Check if "space=open" was given as argument
-process.argv.slice(2).forEach(function (val, index, array) {
-  switch (val) {
-    case 'space=open':
-      spaceOpen = true;
-    case 'space=closed':
-      break;
-    case '-h':
-    case '--help':
-    default:
-      console.log('Usage: node MinisterIN.js [options]\n');
-      console.log('Options:');
-      console.log('  space=[open, closed]\tset the current space status (default = closed)');
-      console.log('  -h, --help\t\tprint this message');
-      process.exit(code=0);
-  }
-});
+spaceOpen = program.space.toLowerCase() === 'open';
 
 // Read tweet messages from the tweets.json file
 var tweetMsgs;
