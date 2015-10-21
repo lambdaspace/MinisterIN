@@ -25,7 +25,7 @@ function string(arg) {
 }
 
 program
-    .version('0.0.1')
+    .version('1.1.0')
     .usage('space=[open/closed]')
     .option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', string, 'closed')
     .parse(process.argv);
@@ -35,6 +35,7 @@ spaceOpen = program.space.toLowerCase() === 'open';
 
 // Create an object with the API keys and access tokens
 var APIKeys = require('./apikeys.json');
+// If the keys file cannot be parsed, MinisterIN terminates abnormally
 
 // Read tweet messages from the tweets.json file
 var tweetMsgs;
@@ -53,7 +54,7 @@ try {
     }
 }
 try {
-    helloMsgs = JSON.parse(fs.readFileSync("hello.json"));
+    helloMsgs = require('./hello.json');
 } catch (e) {
     console.log('Could not parse hello file: ' + e.message);
     helloMsgs = {
@@ -74,7 +75,7 @@ var twitterClient = new Twitter({
 // Read IRC configuration file
 var ircConfig;
 try {
-    ircConfig = require("./irc_config.json"));
+    ircConfig = require('./irc_config.json');
 } catch (e) {
     console.log('Could not parse IRC configuration file: ' + e.message);
     ircConfig = {
