@@ -5,12 +5,12 @@ module.exports = {
     var containsName = false;
     var containStatus = false;
     var names = /(consuela|κονσου(έ|ε)λα)+/ig;
-    var status = /(status|στ(α|ά)τ(ου|υ|θ)(σ|ς)|κατ(α|ά)σταση|χ(ώ|ω)ρο(ς|υ)?|x(w|o)ro(s|u)?|katastas(i|h)|an(i|oi|h)xtos|ανοιχτ(ο|ό)ς)+/ig;
+    var status = /(status|στ(α|ά)τ(ου|υ|θ)(σ|ς)|κατ(α|ά)σταση|χ(ώ|ω)ρο(ς|υ)|x(w|o)ro(s|u)|katastas(i|h)|an(i|oi|h)xtos|ανοιχτ(ο|ό)ς)+/ig;
     var hello = /(h(i|ello)|geia|γει(ά|α))+/ig;
     if (names.test(msg)) {
       if(status.test(msg)){
         if (numOfHackers == 0) {
-          return ', sorry space is closed with milk'
+          return ', sorry space is closed'
         } else if (numOfHackers == 1) {
           return ', there is one hacker at the moment'
         } else if (numOfHackers > 1) {
