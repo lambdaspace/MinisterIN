@@ -219,7 +219,7 @@ http.createServer(function (req, res) {
 gh_webhook_handler.on('push', function (event) {
   ircClient.sayAllChannels(event.payload.pusher.name + ' pushed to repository ' + event.payload.repository.name + ':');
   event.payload.commits.forEach(function(commit) {
-    ircClient.sayAllChannels('' + commit.author.name + commit.message);
+    ircClient.sayAllChannels('* ' + commit.author.name + ' - ' + commit.message);
   });
 });
 
