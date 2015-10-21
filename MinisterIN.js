@@ -1,5 +1,4 @@
 // Include needed node.js modules
-var fs = require('fs');
 var http = require('http');
 var Twitter = require('twitter');
 var irc = require('irc');
@@ -10,7 +9,7 @@ var gh_webhook = require('github-webhook-handler');
  * Milliseconds before retrying to update the space status (=10 mins)
  * @type {number}
  */
-const UPDATE_INTERVAL = 600000;
+const UPDATE_INTERVAL = 10 * 60 * 1000;
 
 var numOfHackers = -1;
 var spaceOpen = false;
@@ -33,10 +32,13 @@ process.argv.slice(2).forEach(function (val, index, array) {
   }
 });
 
+// Create an object with the API keys and access tokens
+var APIKeys = require('./apikeys.json');
+
 // Read tweet messages from the tweets.json file
 var tweetMsgs;
 try {
-    tweetMsgs = JSON.parse(fs.readFileSync("tweets.json"));
+    tweetMsgs = require('./tweets.json');
 } catch (e) {
     console.log('Could not parse tweets file: ' + e.message);
     tweetMsgs = {
@@ -49,22 +51,18 @@ try {
     }
 }
 
-
-// Create an object with the twitter keys and access tokens
-var twitterKeys = require('./twitter.key');
-
 // Create a twitter client
 var twitterClient = new Twitter({
-    consumer_key: twitterKeys.consumer_key,
-    consumer_secret: twitterKeys.consumer_secret,
-    access_token_key: twitterKeys.access_token_key,
-    access_token_secret: twitterKeys.access_token_secret
+    consumer_key: APIKeys.twitter.consumer_key,
+    consumer_secret: APIKeys.twitter.consumer_secret,
+    access_token_key: APIKeys.twitter.access_token_key,
+    access_token_secret: APIKeys.twitter.access_token_secret
 });
 
 // Read IRC configuration file
 var ircConfig;
 try {
-    ircConfig = JSON.parse(fs.readFileSync("irc_config.json"));
+    ircConfig = require("./irc_config.json"));
 } catch (e) {
     console.log('Could not parse IRC configuration file: ' + e.message);
     ircConfig = {
@@ -119,12 +117,6 @@ var tweetSpaceOpened = function(newStatus) {
  * in case there was an error while parsing the hackers.txt file.
  */
 var updateStatus = function(numOfHackers) {
-    // If hackers.txt could not be parsed
-    if (isNaN(numOfHackers)) {
-        console.log('Could not parse hackers.txt file.');
-        return;
-    }
-
     if (spaceOpen) {
         if (numOfHackers == 0) {
             // If space status was open and there are no hackers anymore
@@ -164,6 +156,13 @@ var getCallback = function(response) {
 
     response.on('end', function () {
         numOfHackers = parseInt(str);
+
+        // If hackers.txt could not be parsed
+        if (isNaN(numOfHackers)) {
+            console.log('Could not parse hackers.txt file.');
+            return;
+        }
+
         updateStatus(numOfHackers);
         // Uncommnent to debug number of hackers
         //console.log('Number of Hackers: ' + numOfHackers);
@@ -191,7 +190,7 @@ ircClient.addListener('message#TechMinistry', function(from, message) {
 })
 
 // Github organization Webhooks
-var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': 'secret'});
+var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': APIKeys.github.webhook});
 http.createServer(function (req, res) {
   gh_webhook_handler(req, res, function (err) {
     res.statusCode = 404;
