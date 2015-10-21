@@ -3,7 +3,7 @@ var fs = require('fs');
 var http = require('http');
 var Twitter = require('twitter');
 var irc = require('irc');
-var bot = require('./ircbot');
+var bot = require('./ircbot.js');
 var gh_webhook = require('github-webhook-handler');
 var program = require('commander');
 
@@ -36,6 +36,7 @@ spaceOpen = program.space.toLowerCase() === 'open';
 
 // Read tweet messages from the tweets.json file
 var tweetMsgs;
+var helloMsgs;
 try {
     tweetMsgs = JSON.parse(fs.readFileSync("tweets.json"));
 } catch (e) {
@@ -46,6 +47,16 @@ try {
         ],
         'statusClosed': [
             "Minister is out"
+        ]
+    }
+}
+try {
+    helloMsgs = JSON.parse(fs.readFileSync("hello.json"));
+} catch (e) {
+    console.log('Could not parse hello file: ' + e.message);
+    helloMsgs = {
+        'hello': [
+            "hello!"
         ]
     }
 }
@@ -185,7 +196,7 @@ var updateInterval = setInterval(function() {
 
 // Reply with the status of TechMinistry when someone says "ConsuelaTM, status"
 ircClient.addListener('message#TechMinistry', function(from, message) {
-  var reply = bot.containsNameAndStatus(message, numOfHackers, tweetMsgs)
+  var reply = bot.ircReply(message, numOfHackers, tweetMsgs, helloMsgs)
   if (reply !== undefined) {
     ircClient.say(ircConfig.channels[0], from + reply)
   }
