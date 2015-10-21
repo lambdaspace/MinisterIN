@@ -87,6 +87,11 @@ try {
 
 // Create an IRC client
 var ircClient = new irc.Client(ircConfig.server, ircConfig.nick, ircConfig);
+ircClient.sayAllChannels = function(message) {
+    ircConfig.channels.forEach(function(channel) {
+      ircClient.say(channel, message);
+  })
+};
 
 /**
  * Tweet the status of the space
@@ -111,7 +116,7 @@ var tweetSpaceOpened = function(newStatus) {
             console.log(response);  // Raw response object.
         } else {
             // IRC bot says the random message in the channel
-            ircClient.say(ircConfig.channels[0], tweetMsg);
+            ircClient.sayAllChannels(tweetMsg);
             console.log('Successfully tweeted: ' + tweet);
 
             // Update the status of the spaceOpen variable only after the status
@@ -211,10 +216,11 @@ http.createServer(function (req, res) {
   })
 }).listen(7777);
 
-gh_webhook_handler.on('*', function (event) {
-  if (event.payload.repository.name !== undefined) {
-    ircClient.say(ircConfig.channels[0], 'Update on respository '  + event.payload.repository.name);
-  }
+gh_webhook_handler.on('push', function (event) {
+  ircClient.sayAllChannels(event.payload.pusher.name + ' pushed to repository ' + event.payload.repository.name + ':');
+  ircClient.sayAllChannels(event.payload.commits.forEach(function(value) {
+    return '' + value.author.name + value.message;
+  }));
 });
 
 gh_webhook_handler.on('error', function (err) {
