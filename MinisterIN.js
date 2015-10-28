@@ -1,3 +1,5 @@
+/*jshint esnext: true */
+
 // Include needed node.js modules
 var http = require('http');
 var Twitter = require('twitter');
@@ -51,7 +53,7 @@ try {
     'statusClosed': [
       "Minister is out"
     ]
-  }
+  };
 }
 try {
   helloMsgs = require('./hello.json');
@@ -61,7 +63,7 @@ try {
     'hello': [
       "hello!"
     ]
-  }
+  };
 }
 
 // Create a twitter client
@@ -82,7 +84,7 @@ try {
     server: "irc.freenode.net",
     nick: "ConsuelaTM",
     channels: ["#TechMinistry"]
-  }
+  };
 }
 
 // Create an IRC client
@@ -90,7 +92,7 @@ var ircClient = new irc.Client(ircConfig.server, ircConfig.nick, ircConfig);
 ircClient.sayAllChannels = function(message) {
   ircConfig.channels.forEach(function(channel) {
     ircClient.say(channel, message);
-  })
+  });
 };
 
 /**
@@ -136,7 +138,7 @@ var tweetSpaceOpened = function(newStatus) {
 */
 var updateStatus = function(numOfHackers) {
   if (spaceOpen) {
-    if (numOfHackers == 0) {
+    if (numOfHackers === 0) {
       // If space status was open and there are no hackers anymore
       console.log('Space is empty.');
       tweetSpaceOpened(false);
@@ -201,11 +203,11 @@ var updateInterval = setInterval(function() {
 
 // Reply with the status of TechMinistry when someone says "ConsuelaTM, status"
 ircClient.addListener('message#TechMinistry', function(from, message) {
-  var reply = bot.ircReply(message, numOfHackers, tweetMsgs, helloMsgs)
+  var reply = bot.ircReply(message, numOfHackers, tweetMsgs, helloMsgs);
   if (reply !== undefined) {
-    ircClient.say(ircConfig.channels[0], from + reply)
+    ircClient.say(ircConfig.channels[0], from + reply);
   }
-})
+});
 
 // Github organization Webhooks
 var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': APIKeys.github.webhook});
@@ -213,7 +215,7 @@ http.createServer(function (req, res) {
   gh_webhook_handler(req, res, function (err) {
     res.statusCode = 404;
     res.end('No such location');
-  })
+  });
 }).listen(7777);
 
 gh_webhook_handler.on('push', function (event) {
