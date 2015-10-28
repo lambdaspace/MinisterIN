@@ -7,17 +7,17 @@ module.exports = {
     var hello = /(h(i|ello)|geia|γει(ά|α))+/ig;
     if (names.test(msg)) {
       if(status.test(msg)){
-        if (numOfHackers == 0) {
-          return ', sorry space is closed'
+        if (numOfHackers === 0) {
+          return ', sorry space is closed';
         } else if (numOfHackers == 1) {
-          return ', there is one hacker at the moment'
+          return ', there is one hacker at the moment';
         } else if (numOfHackers > 1) {
-          return ', there are ' + numOfHackers + ' hackers at the moment'
+          return ', there are ' + numOfHackers + ' hackers at the moment';
         } else {
-          return ', sorry I couldn\'t get the information you asked for, please try again in a few minutes'
+          return ', sorry I couldn\'t get the information you asked for, please try again in a few minutes';
         }
       }else if(hello.test(msg)) {
-        return ', ' + helloMsgs.hello[Math.floor(Math.random() * helloMsgs.hello.length)]
+        return ', ' + helloMsgs.hello[Math.floor(Math.random() * helloMsgs.hello.length)];
       }
     }
   }

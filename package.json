@@ -9,11 +9,18 @@
       "web": "https://github.com/misaakidis"
     }
   ],
+  "scripts": {
+    "test": "./node_modules/jshint/bin/jshint *.js",
+    "start": "node MinisterIN.js"
+  },
   "dependencies": {
     "twitter": "latest",
     "irc": "latest",
     "github-webhook-handler": "latest",
     "commander": "latest"
+  },
+  "devDependencies": {
+    "jshint": "latest"
   },
   "repository": [
     {
