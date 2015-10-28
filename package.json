@@ -1,18 +1,37 @@
 {
   "name": "MinisterIN",
-  "description": "Notification service of the hackerspace status.",
-  "version": "1.1.0",
-  "maintainers": [
+  "description": "Notification service for the techministry.gr hackerspace.",
+  "version": "1.1.1",
+  "license": "GPL-3.0",
+  "author": {
+    "name": "Marios Isaakidis",
+    "email": "misaakidis@yahoo.gr",
+    "web": "https://github.com/misaakidis"
+  },
+  "contributors:": [
     {
-      "name": "Marios Isaakidis",
-      "email": "misaakidis@yahoo.gr",
-      "web": "https://github.com/misaakidis"
+      "name": "Alexandros Dorodoulis",
+      "email": "alexdor@users.noreply.github.com"
+    },
+    {
+      "name": "Zack Mullaly",
+      "email": "redwire@riseup.net",
+      "web": "http://redwire.co"
     }
   ],
+  "bugs": {
+    "url": "https://github.com/techministry/MinisterIN/issues"
+  },
   "scripts": {
     "test": "./node_modules/jshint/bin/jshint *.js",
     "start": "node MinisterIN.js"
   },
+  "repository": [
+    {
+      "type": "git",
+      "url": "https://github.com/techministry/MinisterIN.git"
+    }
+  ],
   "dependencies": {
     "twitter": "latest",
     "irc": "latest",
@@ -21,17 +40,5 @@
   },
   "devDependencies": {
     "jshint": "latest"
-  },
-  "repository": [
-    {
-      "type": "git",
-      "url": "https://github.com/techministry/MinisterIN.git"
-    }
-  ],
-  "licenses": [
-    {
-      "name": "GPL v3",
-      "url": "https://www.gnu.org/licenses/gpl-3.0.html"
-    }
-  ]
+  }
 }

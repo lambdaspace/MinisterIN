@@ -27,7 +27,7 @@ function string(arg) {
 }
 
 program
-.version('1.1.0')
+.version('1.1.1')
 .usage('space=[open/closed]')
 .option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', string, 'closed')
 .parse(process.argv);
