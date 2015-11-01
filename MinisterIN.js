@@ -184,7 +184,7 @@ var getCallback = function(response) {
     }
 
     updateStatus(numOfHackers);
-    // Uncommnent to debug number of hackers
+    // Uncomment to debug number of hackers
     //console.log('Number of Hackers: ' + numOfHackers);
   });
 };
@@ -201,9 +201,9 @@ var updateInterval = setInterval(function() {
   req.end();
 }, UPDATE_INTERVAL);
 
-// Reply with the status of TechMinistry when someone says "ConsuelaTM, status"
+// Reply to questions directed to Consuela
 ircClient.addListener('message#TechMinistry', function(from, message) {
-  var reply = bot.ircReply(message, numOfHackers, tweetMsgs, helloMsgs);
+  var reply = bot(message, numOfHackers, helloMsgs);
   if (reply !== undefined) {
     ircClient.say(ircConfig.channels[0], from + reply);
   }
