@@ -7,19 +7,18 @@ module.exports = function(message, numOfHackers, helloMsgs) {
   var help = /(help|βο(ή|η)θεια|vo(i|h)(th|8|u)(ei|i)a|dafuq)+/ig;
   if (names.test(msg)) {
     if (status.test(msg)) {
-      if (numOfHackers === 0) {
+      if (numOfHackers == 0) {
         return ", sorry the space is closed";
       } else if (numOfHackers == 1) {
         return ", there is one hacker at the moment";
       } else if (numOfHackers > 1) {
-        reply = ", there are " + numOfHackers + " hackers at the moment";
+        return ", there are " + numOfHackers + " hackers at the moment";
       } else {
         return ", sorry I couldn\'t get the information you asked " +
           "for, please try again in a few minutes";
       }
     } else if (hello.test(msg)) {
-      return ", " + helloMsgs
-        .hello[Math.floor(Math.random() * helloMsgs.hello.length)];
+      return ", " + helloMsgs.hello[Math.floor(Math.random() * helloMsgs.hello.length)];
     } else if (help.test(msg)) {
       return ", hello I am beautiful bot written in node.js! " +
         "You can ask me if Tech Ministry is open or closed " +
