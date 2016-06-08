@@ -7,33 +7,33 @@ var irc = require('irc');
 var bot = require('./ircbot.js');
 var gh_webhook = require('github-webhook-handler');
 var program = require('commander');
-
-/**
-* Milliseconds before retrying to update the space status (=10 mins)
-* @type {number}
-*/
-const UPDATE_INTERVAL = 10 * 60 * 1000;
+var mqtt = require ('mqtt');
+var fs = require('fs');
 
 var numOfHackers = -1;
 var spaceOpen = false;
 
-/**
-* Convert any provided argument to its string representation.
-* @param arg - Any argument
-* @return the string form of the provided argument
-*/
-function string(arg) {
-  return '' + arg;
-}
-
 program
-.version('1.1.1')
+.version('1.2.0')
 .usage('space=[open/closed]')
-.option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', string, 'closed')
+.option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', /^(closed|open)$/i, 'closed')
 .parse(process.argv);
 
 // Check if "space=open" was given as argument
 spaceOpen = program.space.toLowerCase() === 'open';
+
+// Read MQTT configuration file
+var mqttConfig;
+try {
+  mqttConfig = require('./mqtt_config.json');
+} catch (e) {
+  console.log('Could not parse MQTT configuration file: ' + e.message);
+  mqttConfig = {
+    caFile : "MQTT-CA-TM.crt",
+    port : "1883",
+    host : "www.techministry.gr"
+  };
+}
 
 // Create an object with the API keys and access tokens
 var APIKeys = require('./apikeys.json');
@@ -86,6 +86,23 @@ try {
     channels: ["#TechMinistry"]
   };
 }
+
+var CA = fs.readFileSync(__dirname + "/" + mqttConfig.caFile);
+
+var mqttOptions = {
+  port: mqttConfig.port,
+  host: mqttConfig.host,
+  protocol: 'mqtts',
+  rejectUnauthorized : true,
+  //The CA list will be used to determine if server is authorized
+  ca: CA
+};
+
+var client = mqtt.connect(mqttOptions);
+client.on('connect', function(){
+  console.log('Connected to MQTT broker ' + mqttConfig.host);
+});
+
 
 // Create an IRC client
 var ircClient = new irc.Client(ircConfig.server, ircConfig.nick, ircConfig);
@@ -152,55 +169,6 @@ var updateStatus = function(numOfHackers) {
   }
 };
 
-
-/**
-* Options for the GET request
-*
-* @type {{host: string, path: string}}
-*/
-var getOptions = {
-  host: 'www.techministry.gr',
-  path: '/hackers.txt'
-};
-
-/**
-* Callback function for the GET hackers.txt request
-*
-* @param response the response of the GET request
-*/
-var getCallback = function(response) {
-  var str = '';
-  response.on('data', function (chunk) {
-    str += chunk;
-  });
-
-  response.on('end', function () {
-    numOfHackers = parseInt(str);
-
-    // If hackers.txt could not be parsed
-    if (isNaN(numOfHackers)) {
-      console.log('Could not parse hackers.txt file.');
-      return;
-    }
-
-    updateStatus(numOfHackers);
-    // Uncomment to debug number of hackers
-    //console.log('Number of Hackers: ' + numOfHackers);
-  });
-};
-
-
-// Set intervals for requesting the hackers.txt file
-var updateInterval = setInterval(function() {
-  var req = http.request(getOptions, getCallback);
-
-  req.on('error', function(e) {
-    console.log('Error while GETting hackers.txt: ' + e.message);
-  });
-
-  req.end();
-}, UPDATE_INTERVAL);
-
 // Reply to questions directed to Consuela
 ircClient.addListener('message#TechMinistry', function(from, message) {
   var reply = bot(message, numOfHackers, helloMsgs);
@@ -228,3 +196,19 @@ gh_webhook_handler.on('push', function (event) {
 gh_webhook_handler.on('error', function (err) {
   console.error('Github Webhook error:', err.message);
 });
+
+// Add MQTT listener callback
+client.on('message', function(topic, message) {
+  numOfHackers = parseInt(message.toString());
+  // If message could not be parsed to number
+  if (isNaN(numOfHackers)) {
+    console.log('Could not parse number of hackers: ' + message.toString());
+    return;
+  }
+
+  updateStatus(numOfHackers);
+  // Uncomment to debug number of hackers
+  //console.log('Number of Hackers: ' + numOfHackers);
+});
+
+client.subscribe('techministry/spacestatus/hackers');

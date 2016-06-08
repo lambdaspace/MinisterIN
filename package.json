@@ -1,7 +1,7 @@
 {
   "name": "MinisterIN",
   "description": "Notification service for the techministry.gr hackerspace.",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "license": "GPL-3.0",
   "author": {
     "name": "Marios Isaakidis",
@@ -33,10 +33,12 @@
     }
   ],
   "dependencies": {
-    "twitter": "latest",
-    "irc": "latest",
+    "commander": "latest",
+    "fs": "0.0.2",
     "github-webhook-handler": "latest",
-    "commander": "latest"
+    "irc": "latest",
+    "mqtt": "^1.11.0",
+    "twitter": "latest"
   },
   "devDependencies": {
     "jshint": "latest"
