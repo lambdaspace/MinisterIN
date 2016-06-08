@@ -1,0 +1,5 @@
+{
+  "caFile" : "MQTT-CA-TM.crt",
+  "port" : "1883",
+  "host" : "www.techministry.gr"
+}
