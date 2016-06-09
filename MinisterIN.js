@@ -250,6 +250,7 @@ var eventParser = function(topic) {
 // Populate the events table thread
 var parseEvents = function(data) {
   var futureEvents = new Array();
+  var dateToday = new Date();
 
   data.topic_list.topics.forEach(function(topic) {
     var event;
@@ -259,9 +260,9 @@ var parseEvents = function(data) {
       return;
     }
     var pubEvent = null;
-    if (event.date.get(Calendar.DAY_OF_YEAR) == Date.now().get(Calendar.DAY_OF_YEAR)) {
+    if (event.date.getDate() - dateToday.getDate() == 0) {
       pubEvent = 'TODAY ';
-    } else if (event.date.get(Calendar.DAY_OF_YEAR) == Date.now().get(Calendar.DAY_OF_YEAR) + 1) {
+    } else if (event.date.getDate().tomorrow() - dateToday.getDate() == 0) {
       pubEvent = 'TOMORROW ';
     }
     if (!!pubEvent) {
@@ -298,7 +299,7 @@ var getEventsCallback = function(response) {
   });
 
   response.on('end', function () {
-    parseEvents(str);
+    parseEvents(JSON.parse(str););
   });
 };
 
