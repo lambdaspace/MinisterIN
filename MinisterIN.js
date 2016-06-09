@@ -233,7 +233,7 @@ var eventParser = function(topic) {
     throw 'Not in expected format';
   }
   var dateTokens = tokens[0].split('/');
-  var eventDate = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 23, 59);
+  var eventDate = new Date(dateTokens[2], dateTokens[1], dateTokens[0], 20, 00);
 
   event.date = eventDate;
 
@@ -258,9 +258,9 @@ var parseEvents = function(data) {
       return;
     }
     var pubEvent = null;
-    if (event.date.getDate().equals(Date.parse('today'))) {
+    if (event.date.equals(Date.parse('today'))) {
       pubEvent = 'TODAY ';
-    } else if (event.date.getDate().equals(Date.parse('tomorrow'))) {
+    } else if (event.date.equals(Date.parse('tomorrow'))) {
       pubEvent = 'TOMORROW ';
     }
     if (!!pubEvent) {
@@ -269,7 +269,7 @@ var parseEvents = function(data) {
       pubEvent = pubEvent.substring(0,140);
       twitterClient.post('statuses/update', {status: pubEvent}, function(error, tweet, response){
         if (error) {
-          console.log('Could not tweet event: ' + tweet);  // Tweet body.
+          console.log('Could not tweet event: ' + pubEvent);  // Tweet body.
         }
       });
     }
@@ -302,7 +302,7 @@ var getEventsCallback = function(response) {
   });
 };
 
-cron.scheduleJob('0 11 * * * *', function(){
+cron.scheduleJob('0 0 11 * * * *', function(){
   var req = http.request(getEventsOptions, getEventsCallback);
 
   req.on('error', function(e) {
