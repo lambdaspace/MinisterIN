@@ -233,9 +233,7 @@ var eventParser = function(topic) {
     throw 'Not in expected format';
   }
   var dateTokens = tokens[0].split('/');
-  var eventDate = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0] - 1, 20, 00);
-
-  event.date = eventDate.clearTime();
+  event.date = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 00, 00);
 
   if (tokens[1].match(/^\d\d:\d\d+$/)) {
     event.time = tokens[1];
@@ -248,7 +246,7 @@ var eventParser = function(topic) {
   return event;
 }
 
-// Populate the events table thread
+// Iterate the list of events from discourse and announce forthcoming ones
 var parseEvents = function(data) {
   data.topic_list.topics.forEach(function(topic) {
     var event;
@@ -264,9 +262,9 @@ var parseEvents = function(data) {
       pubEvent = 'TOMORROW ';
     }
     if (!!pubEvent) {
-      pubEvent = pubEvent + event.time + ' : ' + event.title;
+      pubEvent = pubEvent + event.time + ' - ' + event.title;
       ircClient.sayAllChannels(pubEvent);
-      pubEvent = pubEvent.substring(0,140);
+      pubEvent = pubEvent.substring(0,139);
       twitterClient.post('statuses/update', {status: pubEvent}, function(error, tweet, response){
         if (error) {
           console.log('Could not tweet event: ' + pubEvent);  // Tweet body.
@@ -287,7 +285,7 @@ var getEventsOptions = {
 };
 
 /**
-* Callback function for the GET hackers.txt request
+* Callback function for the GET events-JSON request
 *
 * @param response the response of the GET request
 */
@@ -306,6 +304,7 @@ var getEventsCallback = function(response) {
   });
 };
 
+// Check for events every day at 11:00
 cron.scheduleJob('0 0 11 * * * *', function(){
   var req = http.request(getEventsOptions, getEventsCallback);
 
