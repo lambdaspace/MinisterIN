@@ -7,7 +7,7 @@ var irc = require('irc');
 var bot = require('./ircbot.js');
 var gh_webhook = require('github-webhook-handler');
 var program = require('commander');
-var mqtt = require ('mqtt');
+var mqtt = require('mqtt');
 var fs = require('fs');
 var cron = require('node-schedule');
 
@@ -273,7 +273,7 @@ var parseEvents = function(data) {
         }
       });
     }
-  }
+  });
 }
 
 /**
