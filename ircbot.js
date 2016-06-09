@@ -7,7 +7,7 @@ module.exports = function(message, numOfHackers, helloMsgs) {
   var help = /(help|βο(ή|η)θεια|vo(i|h)(th|8|u)(ei|i)a|dafuq)+/ig;
   if (names.test(msg)) {
     if (status.test(msg)) {
-      if (numOfHackers == 0) {
+      if (numOfHackers === 0) {
         return ", sorry the space is closed";
       } else if (numOfHackers == 1) {
         return ", there is one hacker at the moment";

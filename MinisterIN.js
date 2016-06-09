@@ -14,7 +14,7 @@ var numOfHackers = -1;
 var spaceOpen = false;
 
 program
-.version('1.2.0')
+.version('1.2.1')
 .usage('space=[open/closed]')
 .option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', /^(closed|open)$/i, 'closed')
 .parse(process.argv);
@@ -130,7 +130,7 @@ var tweetSpaceOpened = function(newStatus) {
   }
 
   twitterClient.post('statuses/update', {status: tweetMsg},  function(error, tweet, response){
-    if(error) {
+    if (error) {
       console.log('Could not tweet: ' + tweet);  // Tweet body.
       console.log(response);  // Raw response object.
     } else {
@@ -175,6 +175,12 @@ ircClient.addListener('message#TechMinistry', function(from, message) {
   if (reply !== undefined) {
     ircClient.say(ircConfig.channels[0], from + reply);
   }
+});
+
+// Welcome new people joining the Techministry channel
+ircClient.addListener('join#TechMinistry', function(nick, message) {
+    ircClient.say(ircConfig.channels[0], nick + ", " +
+      helloMsgs.hello[Math.floor(Math.random() * helloMsgs.hello.length)]);
 });
 
 // Github organization Webhooks
