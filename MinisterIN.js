@@ -9,6 +9,7 @@ var gh_webhook = require('github-webhook-handler');
 var program = require('commander');
 var mqtt = require ('mqtt');
 var fs = require('fs');
+var cron = require('node-schedule');
 
 var numOfHackers = -1;
 var spaceOpen = false;
@@ -218,3 +219,95 @@ client.on('message', function(topic, message) {
 });
 
 client.subscribe('techministry/spacestatus/hackers');
+
+
+/* Disclaimer: follows code that is very specific to the TechMinistry stack */
+
+// Parse events from discourse
+var eventParser = function(topic) {
+  var event = {};
+  var tokens = topic.split(' ');
+  event.day = tokens[0];
+  if (!event.day.match(/^\d\d\/\d\d\/\d\d\d\d+$/)) {
+    throw 'Not in expected format';
+  }
+  var dateTokens = tokens[0].split('/');
+  var eventDate = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 23, 59);
+
+  event.date = eventDate;
+
+  if (tokens[1].match(/^\d\d:\d\d+$/)) {
+    event.time = tokens[1];
+    event.title = topic.substr(17);
+  } else {
+    event.time = "";
+    event.title = topic.substr(11);
+  }
+
+  return event;
+}
+
+// Populate the events table thread
+var parseEvents = function(data) {
+  var futureEvents = new Array();
+
+  data.topic_list.topics.forEach(function(topic) {
+    var event;
+    try {
+      event = eventParser(topic.title);
+    } catch(e) {
+      return;
+    }
+    var pubEvent = null;
+    if (event.date.get(Calendar.DAY_OF_YEAR) == Date.now().get(Calendar.DAY_OF_YEAR)) {
+      pubEvent = 'TODAY ';
+    } else if (event.date.get(Calendar.DAY_OF_YEAR) == Date.now().get(Calendar.DAY_OF_YEAR) + 1) {
+      pubEvent = 'TOMORROW ';
+    }
+    if (!!pubEvent) {
+      ircClient.sayAllChannels(pubEvent + event.time + ' : ' + event.title);
+      pubEvent = pubEvent.substring(0,140);
+      twitterClient.post('statuses/update', {status: pubEvent}, function(error, tweet, response){
+        if (error) {
+          console.log('Could not tweet event: ' + tweet);  // Tweet body.
+        }
+      });
+    }
+  }
+}
+
+/**
+* Options for the GET request
+*
+* @type {{host: string, path: string}}
+*/
+var getEventsOptions = {
+  host: 'discourse.techministry.gr',
+  path: '/c/5/l/latest.json'
+};
+
+/**
+* Callback function for the GET hackers.txt request
+*
+* @param response the response of the GET request
+*/
+var getEventsCallback = function(response) {
+  var str = '';
+  response.on('data', function (chunk) {
+    str += chunk;
+  });
+
+  response.on('end', function () {
+    parseEvents(str);
+  });
+};
+
+cron.scheduleJob('0 11 * * * *', function(){
+  var req = http.request(getEventsOptions, getEventsCallback);
+
+  req.on('error', function(e) {
+    console.log('Error while GETting events.json: ' + e.message);
+  });
+
+  req.end();
+});

@@ -38,6 +38,7 @@
     "github-webhook-handler": "latest",
     "irc": "latest",
     "mqtt": "^1.11.0",
+    "node-schedule": "^1.1.0",
     "twitter": "latest"
   },
   "devDependencies": {
