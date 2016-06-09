@@ -10,6 +10,7 @@ var program = require('commander');
 var mqtt = require('mqtt');
 var fs = require('fs');
 var cron = require('node-schedule');
+require('datejs');
 
 var numOfHackers = -1;
 var spaceOpen = false;
@@ -249,9 +250,6 @@ var eventParser = function(topic) {
 
 // Populate the events table thread
 var parseEvents = function(data) {
-  var futureEvents = new Array();
-  var dateToday = new Date();
-
   data.topic_list.topics.forEach(function(topic) {
     var event;
     try {
@@ -260,13 +258,14 @@ var parseEvents = function(data) {
       return;
     }
     var pubEvent = null;
-    if (event.date.getDate() - dateToday.getDate() == 0) {
+    if (event.date.getDate().equals(Date.parse('today'))) {
       pubEvent = 'TODAY ';
-    } else if (event.date.getDate().tomorrow() - dateToday.getDate() == 0) {
+    } else if (event.date.getDate().equals(Date.parse('tomorrow'))) {
       pubEvent = 'TOMORROW ';
     }
     if (!!pubEvent) {
-      ircClient.sayAllChannels(pubEvent + event.time + ' : ' + event.title);
+      pubEvent = pubEvent + event.time + ' : ' + event.title;
+      ircClient.sayAllChannels(pubEvent);
       pubEvent = pubEvent.substring(0,140);
       twitterClient.post('statuses/update', {status: pubEvent}, function(error, tweet, response){
         if (error) {
@@ -299,7 +298,7 @@ var getEventsCallback = function(response) {
   });
 
   response.on('end', function () {
-    parseEvents(JSON.parse(str););
+    parseEvents(JSON.parse(str));
   });
 };
 
