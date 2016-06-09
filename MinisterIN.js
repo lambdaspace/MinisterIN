@@ -233,9 +233,9 @@ var eventParser = function(topic) {
     throw 'Not in expected format';
   }
   var dateTokens = tokens[0].split('/');
-  var eventDate = new Date(dateTokens[2], dateTokens[1], dateTokens[0], 20, 00);
+  var eventDate = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0] - 1, 20, 00);
 
-  event.date = eventDate;
+  event.date = eventDate.clearTime();
 
   if (tokens[1].match(/^\d\d:\d\d+$/)) {
     event.time = tokens[1];
@@ -298,7 +298,11 @@ var getEventsCallback = function(response) {
   });
 
   response.on('end', function () {
-    parseEvents(JSON.parse(str));
+    try {
+      parseEvents(JSON.parse(str));
+    } catch (e) {
+      console.log('Response from Discourse could not be parsed to JSON');
+    }
   });
 };
 
