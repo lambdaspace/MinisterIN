@@ -2,6 +2,7 @@
 
 // Include needed node.js modules
 var http = require('http');
+var request = require('request');
 var Twitter = require('twitter');
 var irc = require('irc');
 var bot = require('./ircbot.js');
@@ -274,43 +275,18 @@ var parseEvents = function(data) {
   });
 }
 
-/**
-* Options for the GET request
-*
-* @type {{host: string, path: string}}
-*/
-var getEventsOptions = {
-  host: 'discourse.techministry.gr',
-  path: '/c/5/l/latest.json'
-};
-
-/**
-* Callback function for the GET events-JSON request
-*
-* @param response the response of the GET request
-*/
-var getEventsCallback = function(response) {
-  var str = '';
-  response.on('data', function (chunk) {
-    str += chunk;
-  });
-
-  response.on('end', function () {
-    try {
-      parseEvents(JSON.parse(str));
-    } catch (e) {
-      console.log('Response from Discourse could not be parsed to JSON');
-    }
-  });
-};
-
 // Check for events every day at 11:00
 cron.scheduleJob('0 0 11 * * * *', function(){
-  var req = http.request(getEventsOptions, getEventsCallback);
-
-  req.on('error', function(e) {
-    console.log('Error while GETting events.json: ' + e.message);
+  request('https://discourse.techministry.gr/c/5/l/latest.json', function(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      try {
+        parseEvents(JSON.parse(body));
+      } catch (e) {
+        console.log('Response from Discourse could not be parsed to JSON');
+      }
+    }
+    else {
+      console.log('Error while retrieving events.json');
+    }
   });
-
-  req.end();
 });
