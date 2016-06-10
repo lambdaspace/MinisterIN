@@ -234,7 +234,7 @@ var eventParser = function(topic) {
     throw 'Not in expected format';
   }
   var dateTokens = tokens[0].split('/');
-  event.date = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 00, 00);
+  event.date = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 0, 0);
 
   if (tokens[1].match(/^\d\d:\d\d+$/)) {
     event.time = tokens[1];
@@ -245,7 +245,7 @@ var eventParser = function(topic) {
   }
 
   return event;
-}
+};
 
 // Iterate the list of events from discourse and announce forthcoming ones
 var parseEvents = function(data) {
@@ -273,7 +273,7 @@ var parseEvents = function(data) {
       });
     }
   });
-}
+};
 
 // Check for events every day at 11:00
 cron.scheduleJob('0 0 11 * * * *', function(){
