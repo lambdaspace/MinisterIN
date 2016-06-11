@@ -34,10 +34,13 @@
   ],
   "dependencies": {
     "commander": "latest",
+    "datejs": "^1.0.0-rc3",
     "fs": "0.0.2",
     "github-webhook-handler": "latest",
     "irc": "latest",
     "mqtt": "^1.11.0",
+    "node-schedule": "^1.1.0",
+    "request": "^2.72.0",
     "twitter": "latest"
   },
   "devDependencies": {

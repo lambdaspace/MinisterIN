@@ -2,13 +2,16 @@
 
 // Include needed node.js modules
 var http = require('http');
+var request = require('request');
 var Twitter = require('twitter');
 var irc = require('irc');
 var bot = require('./ircbot.js');
 var gh_webhook = require('github-webhook-handler');
 var program = require('commander');
-var mqtt = require ('mqtt');
+var mqtt = require('mqtt');
 var fs = require('fs');
+var cron = require('node-schedule');
+require('datejs');
 
 var numOfHackers = -1;
 var spaceOpen = false;
@@ -218,3 +221,72 @@ client.on('message', function(topic, message) {
 });
 
 client.subscribe('techministry/spacestatus/hackers');
+
+
+/* Disclaimer: follows code that is very specific to the TechMinistry stack */
+
+// Parse events from discourse
+var eventParser = function(topic) {
+  var event = {};
+  var tokens = topic.split(' ');
+  event.day = tokens[0];
+  if (!event.day.match(/^\d\d\/\d\d\/\d\d\d\d+$/)) {
+    throw 'Not in expected format';
+  }
+  var dateTokens = tokens[0].split('/');
+  event.date = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 0, 0);
+
+  if (tokens[1].match(/^\d\d:\d\d+$/)) {
+    event.time = tokens[1];
+    event.title = topic.substr(17);
+  } else {
+    event.time = "";
+    event.title = topic.substr(11);
+  }
+
+  return event;
+};
+
+// Iterate the list of events from discourse and announce forthcoming ones
+var parseEvents = function(data) {
+  data.topic_list.topics.forEach(function(topic) {
+    var event;
+    try {
+      event = eventParser(topic.title);
+    } catch(e) {
+      return;
+    }
+    var pubEvent = null;
+    if (event.date.equals(Date.parse('today'))) {
+      pubEvent = 'TODAY ';
+    } else if (event.date.equals(Date.parse('tomorrow'))) {
+      pubEvent = 'TOMORROW ';
+    }
+    if (!!pubEvent) {
+      pubEvent = pubEvent + event.time + ' - ' + event.title;
+      ircClient.sayAllChannels(pubEvent);
+      pubEvent = pubEvent.substring(0,139);
+      twitterClient.post('statuses/update', {status: pubEvent}, function(error, tweet, response){
+        if (error) {
+          console.log('Could not tweet event: ' + pubEvent);  // Tweet body.
+        }
+      });
+    }
+  });
+};
+
+// Check for events every day at 11:00
+cron.scheduleJob('0 0 11 * * * *', function(){
+  request('https://discourse.techministry.gr/c/5/l/latest.json', function(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      try {
+        parseEvents(JSON.parse(body));
+      } catch (e) {
+        console.log('Response from Discourse could not be parsed to JSON');
+      }
+    }
+    else {
+      console.log('Error while retrieving events.json');
+    }
+  });
+});
