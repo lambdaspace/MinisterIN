@@ -181,10 +181,10 @@ ircClient.addListener('message#TechMinistry', function(from, message) {
 });
 
 // Welcome new people joining the Techministry channel
-ircClient.addListener('join#TechMinistry', function(nick, message) {
-    ircClient.say(ircConfig.channels[0], nick + ", " +
-      helloMsgs.hello[Math.floor(Math.random() * helloMsgs.hello.length)]);
-});
+// ircClient.addListener('join#TechMinistry', function(nick, message) {
+//     ircClient.say(ircConfig.channels[0], nick + ", " +
+//       helloMsgs.hello[Math.floor(Math.random() * helloMsgs.hello.length)]);
+// });
 
 // Github organization Webhooks
 var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': APIKeys.github.webhook});
