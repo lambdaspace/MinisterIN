@@ -32,7 +32,7 @@ try {
 } catch (e) {
   console.log('Could not parse MQTT configuration file: ' + e.message);
   mqttConfig = {
-    caFile : "MQTT-CA-TM.crt",
+    caFile : "ca.crt",
     port : "1883",
     host : "www.techministry.gr"
   };
