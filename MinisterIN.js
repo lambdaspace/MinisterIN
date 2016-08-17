@@ -34,7 +34,7 @@ try {
   mqttConfig = {
     caFile : "ca.crt",
     port : "1883",
-    host : "www.techministry.gr"
+    host : "www.techministry.rocks"
   };
 }
 
@@ -277,7 +277,7 @@ var parseEvents = function(data) {
 
 // Check for events every day at 11:00
 cron.scheduleJob('0 0 11 * * * *', function(){
-  request('https://discourse.techministry.gr/c/5/l/latest.json', function(error, response, body) {
+  request('https://discourse.techministry.rocks/c/5/l/latest.json', function(error, response, body) {
     if (!error && response.statusCode == 200) {
       try {
         parseEvents(JSON.parse(body));
