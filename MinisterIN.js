@@ -33,8 +33,8 @@ try {
   console.log('Could not parse MQTT configuration file: ' + e.message);
   mqttConfig = {
     caFile : "ca.crt",
-    port : "1883",
-    host : "www.techministry.rocks"
+    port : "8883",
+    host : "mqtt.lambdaspace.gr"
   };
 }
 
@@ -85,8 +85,8 @@ try {
   console.log('Could not parse IRC configuration file: ' + e.message);
   ircConfig = {
     server: "irc.freenode.net",
-    nick: "ConsuelaTM",
-    channels: ["#TechMinistry"]
+    nick: "Consuela-λspace",
+    channels: ["#LambdaSpace"]
   };
 }
 
@@ -173,21 +173,21 @@ var updateStatus = function(numOfHackers) {
 };
 
 // Reply to questions directed to Consuela
-ircClient.addListener('message#TechMinistry', function(from, message) {
+ircClient.addListener('message#LambdaSpace', function(from, message) {
   var reply = bot(message, numOfHackers, helloMsgs);
   if (reply !== undefined) {
     ircClient.say(ircConfig.channels[0], from + reply);
   }
 });
 
-// Welcome new people joining the Techministry channel
-// ircClient.addListener('join#TechMinistry', function(nick, message) {
+// Welcome new people joining the LambdaSpace channel
+// ircClient.addListener('join#LambdaSpace', function(nick, message) {
 //     ircClient.say(ircConfig.channels[0], nick + ", " +
 //       helloMsgs.hello[Math.floor(Math.random() * helloMsgs.hello.length)]);
 // });
 
 // Github organization Webhooks
-var gh_webhook_handler = gh_webhook({'path': '/techministry', 'secret': APIKeys.github.webhook});
+var gh_webhook_handler = gh_webhook({'path': '/lambdaspace', 'secret': APIKeys.github.webhook});
 http.createServer(function (req, res) {
   gh_webhook_handler(req, res, function (err) {
     res.statusCode = 404;
@@ -220,10 +220,10 @@ client.on('message', function(topic, message) {
   //console.log('Number of Hackers: ' + numOfHackers);
 });
 
-client.subscribe('techministry/spacestatus/hackers');
+client.subscribe('lambdaspace/spacestatus/hackers');
 
 
-/* Disclaimer: follows code that is very specific to the TechMinistry stack */
+/* Disclaimer: follows code that is very specific to the LambdaSpace stack */
 
 // Parse events from discourse
 var eventParser = function(topic) {
@@ -277,7 +277,7 @@ var parseEvents = function(data) {
 
 // Check for events every day at 11:00
 cron.scheduleJob('0 0 11 * * * *', function(){
-  request('https://discourse.techministry.rocks/c/5/l/latest.json', function(error, response, body) {
+  request('https://community.lambdaspace.gr/c/5/l/latest.json', function(error, response, body) {
     if (!error && response.statusCode == 200) {
       try {
         parseEvents(JSON.parse(body));
