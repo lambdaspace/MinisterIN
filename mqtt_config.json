@@ -1,5 +1,5 @@
 {
   "caFile" : "ca.crt",
-  "port" : "1883",
-  "host" : "www.techministry.rocks"
+  "port" : "8883",
+  "host" : "mqtt.lambdaspace.gr"
 }
