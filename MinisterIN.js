@@ -101,7 +101,12 @@ var mqttOptions = {
   ca: CA
 };
 
-var client = mqtt.connect(mqttOptions);
+try {
+  var client = mqtt.connect(mqttOptions);
+} catch (e) {
+  console.log(e);
+}
+
 client.on('connect', function(){
   console.log('Connected to MQTT broker ' + mqttConfig.host);
 });
@@ -111,7 +116,11 @@ client.on('connect', function(){
 var ircClient = new irc.Client(ircConfig.server, ircConfig.nick, ircConfig);
 ircClient.sayAllChannels = function(message) {
   ircConfig.channels.forEach(function(channel) {
-    ircClient.say(channel, message);
+    try {
+      ircClient.say(channel, message);
+    } catch (e) {
+      console.log(e);
+    }
   });
 };
 
@@ -126,10 +135,18 @@ var tweetSpaceOpened = function(newStatus) {
   var rand;
   if (newStatus) {
     rand = Math.floor(Math.random() * tweetMsgs.statusOpen.length);
-    tweetMsg = tweetMsgs.statusOpen[rand] + ' - Space: OPEN';
+    try {
+      tweetMsg = tweetMsgs.statusOpen[rand] + ' - Space: OPEN';
+    } catch (e) {
+      console.log(e);
+    }
   } else {
     rand = Math.floor(Math.random() * tweetMsgs.statusClosed.length);
-    tweetMsg = tweetMsgs.statusClosed[rand] + ' - Space: CLOSED';
+    try {
+      tweetMsg = tweetMsgs.statusClosed[rand] + ' - Space: CLOSED';
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   twitterClient.post('statuses/update', {status: tweetMsg},  function(error, tweet, response){
@@ -176,7 +193,11 @@ var updateStatus = function(numOfHackers) {
 ircClient.addListener('message#LambdaSpace', function(from, message) {
   var reply = bot(message, numOfHackers, helloMsgs);
   if (reply !== undefined) {
-    ircClient.say(ircConfig.channels[0], from + reply);
+    try {
+      ircClient.say(ircConfig.channels[0], from + reply);
+    } catch (e) {
+      console.log(e);
+    }
   }
 });
 
@@ -188,12 +209,17 @@ ircClient.addListener('message#LambdaSpace', function(from, message) {
 
 // Github organization Webhooks
 var gh_webhook_handler = gh_webhook({'path': '/lambdaspace', 'secret': APIKeys.github.webhook});
+try {
 http.createServer(function (req, res) {
   gh_webhook_handler(req, res, function (err) {
     res.statusCode = 404;
     res.end('No such location');
   });
 }).listen(7777);
+} catch (e) {
+  console.log(e);
+
+}
 
 gh_webhook_handler.on('push', function (event) {
   ircClient.sayAllChannels(event.payload.pusher.name + ' pushed to repository ' + event.payload.repository.name + ':');
@@ -214,13 +240,17 @@ client.on('message', function(topic, message) {
     console.log('Could not parse number of hackers: ' + message.toString());
     return;
   }
-
   updateStatus(numOfHackers);
   // Uncomment to debug number of hackers
   //console.log('Number of Hackers: ' + numOfHackers);
 });
 
-client.subscribe('lambdaspace/spacestatus/hackers');
+try {
+  client.subscribe('lambdaspace/spacestatus/hackers');
+} catch (e) {
+  console.log(e);
+}
+
 
 
 /* Disclaimer: follows code that is very specific to the LambdaSpace stack */
@@ -276,17 +306,20 @@ var parseEvents = function(data) {
 };
 
 // Check for events every day at 11:00
-cron.scheduleJob('0 0 11 * * * *', function(){
-  request('https://community.lambdaspace.gr/c/5/l/latest.json', function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      try {
-        parseEvents(JSON.parse(body));
-      } catch (e) {
-        console.log('Response from Discourse could not be parsed to JSON');
-      }
+cron.scheduleJob('0 0 11 * * * *', function() {
+    try {
+        request('https://community.lambdaspace.gr/c/5/l/latest.json', function(error, response, body) {
+            if (!error && response.statusCode == 200) {
+                try {
+                    parseEvents(JSON.parse(body));
+                } catch (e) {
+                    console.log('Response from Discourse could not be parsed to JSON');
+                }
+            } else {
+                console.log('Error while retrieving events.json');
+            }
+        });
+    } catch (e) {
+        console.log(e);
     }
-    else {
-      console.log('Error while retrieving events.json');
-    }
-  });
 });
