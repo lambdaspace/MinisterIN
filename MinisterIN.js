@@ -96,7 +96,7 @@ var mqttOptions = {
   port: mqttConfig.port,
   host: mqttConfig.host,
   protocol: 'mqtts',
-  rejectUnauthorized : true,
+  rejectUnauthorized : false,
   //The CA list will be used to determine if server is authorized
   ca: CA
 };
