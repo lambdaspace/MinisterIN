@@ -88,7 +88,7 @@ try {
 
 // Create Mattermost client
 if (mattermostConfig.hook_url) var mattermostClient = new mattermost(mattermostConfig.hook_url);
-var mattermostBroadcast = function(msg, channel = '#services-status') {
+var mattermostBroadcast = function(msg, channel = '#town-square') {
   if (!msg) return;
   try {
     mattermostClient.send({
