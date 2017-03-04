@@ -17,10 +17,10 @@ var numOfHackers = -1;
 var spaceOpen = false;
 
 program
-.version('1.2.1')
-.usage('space=[open/closed]')
-.option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', /^(closed|open)$/i, 'closed')
-.parse(process.argv);
+  .version('1.2.1')
+  .usage('space=[open/closed]')
+  .option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', /^(closed|open)$/i, 'closed')
+  .parse(process.argv);
 
 // Check if "space=open" was given as argument
 spaceOpen = program.space.toLowerCase() === 'open';
@@ -32,9 +32,9 @@ try {
 } catch (e) {
   console.log('Could not parse MQTT configuration file: ' + e.message);
   mqttConfig = {
-    caFile : "ca.crt",
-    port : "8883",
-    host : "mqtt.lambdaspace.gr"
+    caFile: "ca.crt",
+    port: "8883",
+    host: "mqtt.lambdaspace.gr"
   };
 }
 
@@ -96,7 +96,7 @@ var mqttOptions = {
   port: mqttConfig.port,
   host: mqttConfig.host,
   protocol: 'mqtts',
-  rejectUnauthorized : true,
+  rejectUnauthorized: true,
   //The CA list will be used to determine if server is authorized
   ca: CA
 };
@@ -107,7 +107,7 @@ try {
   console.log(e);
 }
 
-client.on('connect', function(){
+client.on('connect', function() {
   console.log('Connected to MQTT broker ' + mqttConfig.host);
 });
 
@@ -125,11 +125,11 @@ ircClient.sayAllChannels = function(message) {
 };
 
 /**
-* Tweet the status of the space
-*
-* @param newStatus true if the space is open,
-* false if the space is closed.
-*/
+ * Tweet the status of the space
+ *
+ * @param newStatus true if the space is open,
+ * false if the space is closed.
+ */
 var tweetSpaceOpened = function(newStatus) {
   var tweetMsg;
   var rand;
@@ -149,10 +149,10 @@ var tweetSpaceOpened = function(newStatus) {
     }
   }
 
-  twitterClient.post('statuses/update', {status: tweetMsg},  function(error, tweet, response){
+  twitterClient.post('statuses/update', { status: tweetMsg }, function(error, tweet, response) {
     if (error) {
-      console.log('Could not tweet: ' + tweet);  // Tweet body.
-      console.log(response);  // Raw response object.
+      console.log('Could not tweet: ' + tweet); // Tweet body.
+      console.log(response); // Raw response object.
     } else {
       // IRC bot says the random message in the channel
       ircClient.sayAllChannels(tweetMsg);
@@ -167,12 +167,12 @@ var tweetSpaceOpened = function(newStatus) {
 
 
 /**
-* Updates the status of the space, given the number
-* of the hackers there.
-*
-* @param numOfHackers the number of hackers in space. or NaN
-* in case there was an error while parsing the hackers.txt file.
-*/
+ * Updates the status of the space, given the number
+ * of the hackers there.
+ *
+ * @param numOfHackers the number of hackers in space. or NaN
+ * in case there was an error while parsing the hackers.txt file.
+ */
 var updateStatus = function(numOfHackers) {
   if (spaceOpen) {
     if (numOfHackers === 0) {
@@ -208,27 +208,27 @@ ircClient.addListener('message#LambdaSpace', function(from, message) {
 // });
 
 // Github organization Webhooks
-var gh_webhook_handler = gh_webhook({'path': '/lambdaspace', 'secret': APIKeys.github.webhook});
+var gh_webhook_handler = gh_webhook({ 'path': '/lambdaspace', 'secret': APIKeys.github.webhook });
 try {
-http.createServer(function (req, res) {
-  gh_webhook_handler(req, res, function (err) {
-    res.statusCode = 404;
-    res.end('No such location');
-  });
-}).listen(7777);
+  http.createServer(function(req, res) {
+    gh_webhook_handler(req, res, function(err) {
+      res.statusCode = 404;
+      res.end('No such location');
+    });
+  }).listen(7777);
 } catch (e) {
   console.log(e);
 
 }
 
-gh_webhook_handler.on('push', function (event) {
+gh_webhook_handler.on('push', function(event) {
   ircClient.sayAllChannels(event.payload.pusher.name + ' pushed to repository ' + event.payload.repository.name + ':');
   event.payload.commits.forEach(function(commit) {
     ircClient.sayAllChannels('* ' + commit.author.name + ' - ' + commit.message);
   });
 });
 
-gh_webhook_handler.on('error', function (err) {
+gh_webhook_handler.on('error', function(err) {
   console.error('Github Webhook error:', err.message);
 });
 
@@ -261,7 +261,7 @@ var eventParser = function(topic) {
   var tokens = topic.split(' ');
   event.day = tokens[0];
   if (!event.day.match(/^\d\d\/\d\d\/\d\d\d\d+$/)) {
-    throw 'Not in expected format';
+    console.log('Not in expected format');
   }
   var dateTokens = tokens[0].split('/');
   event.date = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 0, 0);
@@ -283,7 +283,7 @@ var parseEvents = function(data) {
     var event;
     try {
       event = eventParser(topic.title);
-    } catch(e) {
+    } catch (e) {
       return;
     }
     var pubEvent = null;
@@ -295,10 +295,10 @@ var parseEvents = function(data) {
     if (!!pubEvent) {
       pubEvent = pubEvent + event.time + ' - ' + event.title;
       ircClient.sayAllChannels(pubEvent);
-      pubEvent = pubEvent.substring(0,139);
-      twitterClient.post('statuses/update', {status: pubEvent}, function(error, tweet, response){
+      pubEvent = pubEvent.substring(0, 139);
+      twitterClient.post('statuses/update', { status: pubEvent }, function(error, tweet, response) {
         if (error) {
-          console.log('Could not tweet event: ' + pubEvent);  // Tweet body.
+          console.log('Could not tweet event: ' + pubEvent); // Tweet body.
         }
       });
     }
@@ -307,19 +307,19 @@ var parseEvents = function(data) {
 
 // Check for events every day at 11:00
 cron.scheduleJob('0 0 11 * * * *', function() {
-    try {
-        request('https://community.lambdaspace.gr/c/5/l/latest.json', function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-                try {
-                    parseEvents(JSON.parse(body));
-                } catch (e) {
-                    console.log('Response from Discourse could not be parsed to JSON');
-                }
-            } else {
-                console.log('Error while retrieving events.json');
-            }
-        });
-    } catch (e) {
-        console.log(e);
-    }
+  try {
+    request('https://community.lambdaspace.gr/c/5/l/latest.json', function(error, response, body) {
+      if (!error && response.statusCode == 200) {
+        try {
+          parseEvents(JSON.parse(body));
+        } catch (e) {
+          console.log('Response from Discourse could not be parsed to JSON');
+        }
+      } else {
+        console.log('Error while retrieving events.json');
+      }
+    });
+  } catch (e) {
+    console.log(e);
+  }
 });
