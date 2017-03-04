@@ -1,24 +1,21 @@
 {
   "name": "MinisterIN",
   "description": "Notification service for the lambdaspace.gr hackerspace.",
-  "version": "1.2.1",
+  "version": "1.3.1",
   "license": "GPL-3.0",
   "author": {
     "name": "Marios Isaakidis",
     "email": "misaakidis@yahoo.gr",
     "web": "https://github.com/misaakidis"
   },
-  "contributors:": [
-    {
-      "name": "Alexandros Dorodoulis",
-      "email": "aldor94@gmail.com"
-    },
-    {
-      "name": "Zack Mullaly",
-      "email": "redwire@riseup.net",
-      "web": "http://redwire.co"
-    }
-  ],
+  "contributors:": [{
+    "name": "Alexandros Dorodoulis",
+    "email": "aldor94@gmail.com"
+  }, {
+    "name": "Zack Mullaly",
+    "email": "redwire@riseup.net",
+    "web": "http://redwire.co"
+  }],
   "bugs": {
     "url": "https://github.com/techministry/MinisterIN/issues"
   },
@@ -26,12 +23,10 @@
     "test": "./node_modules/jshint/bin/jshint *.js",
     "start": "node MinisterIN.js"
   },
-  "repository": [
-    {
-      "type": "git",
-      "url": "https://github.com/techministry/MinisterIN.git"
-    }
-  ],
+  "repository": [{
+    "type": "git",
+    "url": "https://github.com/techministry/MinisterIN.git"
+  }],
   "dependencies": {
     "commander": "2.9.0",
     "datejs": "^1.0.0-rc3",
@@ -39,6 +34,7 @@
     "github-webhook-handler": "0.5.0",
     "irc": "0.4.0",
     "mqtt": "^1.11.0",
+    "node-mattermost": "^0.0.1",
     "node-schedule": "^1.1.0",
     "request": "^2.72.0",
     "twitter": "1.2.5"
