@@ -11,13 +11,14 @@ var program = require('commander');
 var mqtt = require('mqtt');
 var fs = require('fs');
 var cron = require('node-schedule');
+var mattermost = require('node-mattermost');
 require('datejs');
 
 var numOfHackers = -1;
 var spaceOpen = false;
 
 program
-  .version('1.2.1')
+  .version('1.3.1')
   .usage('space=[open/closed]')
   .option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', /^(closed|open)$/i, 'closed')
   .parse(process.argv);
@@ -77,6 +78,32 @@ var twitterClient = new Twitter({
   access_token_secret: APIKeys.twitter.access_token_secret
 });
 
+// Read Mattermost config
+try {
+  var mattermostConfig = require('./mattermost_config.json');
+} catch (e) {
+  console.log('Could not parse mattermost configuration file: ' + e.message);
+}
+
+
+// Create Mattermost client
+if (mattermostConfig.hook_url) var mattermostClient = new mattermost(mattermostConfig.hook_url);
+var mattermostBroadcast = function(msg, channel = '#services-status') {
+  if (!msg) return;
+  try {
+    mattermostClient.send({
+      text: msg,
+      channel: channel,
+      icon_url: mattermostConfig.icon,
+      username: mattermostConfig.username
+    });
+    return true;
+  } catch (e) {
+    console.log('Could not post to mattermost' + e);
+    return false;
+  }
+};
+
 // Read IRC configuration file
 var ircConfig;
 try {
@@ -130,39 +157,39 @@ ircClient.sayAllChannels = function(message) {
  * @param newStatus true if the space is open,
  * false if the space is closed.
  */
-var tweetSpaceOpened = function(newStatus) {
-  var tweetMsg;
+var broadcastStatusChange = function(newStatus) {
+  var msg;
   var rand;
   if (newStatus) {
     rand = Math.floor(Math.random() * tweetMsgs.statusOpen.length);
     try {
-      tweetMsg = tweetMsgs.statusOpen[rand] + ' - Space: OPEN';
+      msg = tweetMsgs.statusOpen[rand] + ' - Space: OPEN';
     } catch (e) {
       console.log(e);
     }
   } else {
     rand = Math.floor(Math.random() * tweetMsgs.statusClosed.length);
     try {
-      tweetMsg = tweetMsgs.statusClosed[rand] + ' - Space: CLOSED';
+      msg = tweetMsgs.statusClosed[rand] + ' - Space: CLOSED';
     } catch (e) {
       console.log(e);
     }
   }
 
-  twitterClient.post('statuses/update', { status: tweetMsg }, function(error, tweet, response) {
+  twitterClient.post('statuses/update', { status: msg }, function(error, tweet, response) {
     if (error) {
       console.log('Could not tweet: ' + tweet); // Tweet body.
       console.log(response); // Raw response object.
     } else {
       // IRC bot says the random message in the channel
-      ircClient.sayAllChannels(tweetMsg);
-      console.log('Successfully tweeted: ' + tweet);
-
+      ircClient.sayAllChannels(msg);
       // Update the status of the spaceOpen variable only after the status
       // got successfully tweeted
       spaceOpen = newStatus;
     }
   });
+
+  if (mattermostBroadcast(msg)) spaceOpen = newStatus;
 };
 
 
@@ -177,14 +204,12 @@ var updateStatus = function(numOfHackers) {
   if (spaceOpen) {
     if (numOfHackers === 0) {
       // If space status was open and there are no hackers anymore
-      console.log('Space is empty.');
-      tweetSpaceOpened(false);
+      broadcastStatusChange(false);
     }
   } else {
     if (numOfHackers > 0) {
       // If space was closed and there are hackers now
-      console.log('Space is open!');
-      tweetSpaceOpened(true);
+      broadcastStatusChange(true);
     }
   }
 };
@@ -224,7 +249,9 @@ try {
 gh_webhook_handler.on('push', function(event) {
   ircClient.sayAllChannels(event.payload.pusher.name + ' pushed to repository ' + event.payload.repository.name + ':');
   event.payload.commits.forEach(function(commit) {
-    ircClient.sayAllChannels('* ' + commit.author.name + ' - ' + commit.message);
+    var msg = '* ' + commit.author.name + ' - ' + commit.message;
+    ircClient.sayAllChannels(msg);
+    mattermostBroadcast(msg, '#off-topic');
   });
 });
 
@@ -301,6 +328,7 @@ var parseEvents = function(data) {
           console.log('Could not tweet event: ' + pubEvent); // Tweet body.
         }
       });
+      mattermostBroadcast(pubEvent);
     }
   });
 };
