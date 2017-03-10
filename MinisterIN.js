@@ -88,7 +88,7 @@ try {
 
 // Create Mattermost client
 if (mattermostConfig.hook_url) var mattermostClient = new mattermost(mattermostConfig.hook_url);
-var mattermostBroadcast = function(msg, channel = '#town-square') {
+var mattermostBroadcast = function(msg, channel = '#off-topic') {
   if (!msg) return;
   try {
     mattermostClient.send({
@@ -189,7 +189,7 @@ var broadcastStatusChange = function(newStatus) {
     }
   });
 
-  if (mattermostBroadcast(msg)) spaceOpen = newStatus;
+  if (mattermostBroadcast(msg, '#status-updates')) spaceOpen = newStatus;
 };
 
 
@@ -251,7 +251,7 @@ gh_webhook_handler.on('push', function(event) {
   event.payload.commits.forEach(function(commit) {
     var msg = '* ' + commit.author.name + ' - ' + commit.message;
     ircClient.sayAllChannels(msg);
-    mattermostBroadcast(msg, '#off-topic');
+    mattermostBroadcast(msg);
   });
 });
 
