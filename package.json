@@ -8,14 +8,17 @@
     "email": "misaakidis@yahoo.gr",
     "web": "https://github.com/misaakidis"
   },
-  "contributors:": [{
-    "name": "Alexandros Dorodoulis",
-    "email": "aldor94@gmail.com"
-  }, {
-    "name": "Zack Mullaly",
-    "email": "redwire@riseup.net",
-    "web": "http://redwire.co"
-  }],
+  "contributors:": [
+    {
+      "name": "Alexandros Dorodoulis",
+      "email": "aldor94@gmail.com"
+    },
+    {
+      "name": "Zack Mullaly",
+      "email": "redwire@riseup.net",
+      "web": "http://redwire.co"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/techministry/MinisterIN/issues"
   },
@@ -23,23 +26,26 @@
     "test": "./node_modules/jshint/bin/jshint *.js",
     "start": "node MinisterIN.js"
   },
-  "repository": [{
-    "type": "git",
-    "url": "https://github.com/techministry/MinisterIN.git"
-  }],
+  "repository": [
+    {
+      "type": "git",
+      "url": "https://github.com/techministry/MinisterIN.git"
+    }
+  ],
   "dependencies": {
-    "commander": "2.9.0",
+    "commander": "2.11.0",
     "datejs": "^1.0.0-rc3",
     "fs": "0.0.2",
-    "github-webhook-handler": "0.5.0",
-    "irc": "0.4.0",
-    "mqtt": "^1.11.0",
+    "github-webhook-handler": "0.6.0",
+    "irc": "0.5.2",
+    "mqtt": "^2.13.1",
     "node-mattermost": "^0.0.1",
     "node-schedule": "^1.1.0",
     "request": "^2.72.0",
-    "twitter": "1.2.5"
+    "twitter": "1.7.1"
   },
   "devDependencies": {
-    "jshint": "latest"
+    "jshint": "^2.9.5",
+    "nodemon": "^1.12.1"
   }
 }
