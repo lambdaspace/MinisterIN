@@ -20,7 +20,12 @@ var spaceOpen = false;
 program
   .version('1.3.1')
   .usage('space=[open/closed]')
-  .option('-s, --space <state>', 'Whether the space is open or closed (default = closed)', /^(closed|open)$/i, 'closed')
+  .option(
+    '-s, --space <state>',
+    'Whether the space is open or closed (default = closed)',
+    /^(closed|open)$/i,
+    'closed'
+  )
   .parse(process.argv);
 
 // Check if "space=open" was given as argument
@@ -33,9 +38,9 @@ try {
 } catch (e) {
   console.log('Could not parse MQTT configuration file: ' + e.message);
   mqttConfig = {
-    caFile: "ca.crt",
-    port: "8883",
-    host: "mqtt.lambdaspace.gr"
+    caFile: 'ca.crt',
+    port: '8883',
+    host: 'mqtt.lambdaspace.gr'
   };
 }
 
@@ -51,12 +56,8 @@ try {
 } catch (e) {
   console.log('Could not parse tweets file: ' + e.message);
   tweetMsgs = {
-    'statusOpen': [
-      "Minister is in"
-    ],
-    'statusClosed': [
-      "Minister is out"
-    ]
+    statusOpen: ['Minister is in'],
+    statusClosed: ['Minister is out']
   };
 }
 try {
@@ -64,9 +65,7 @@ try {
 } catch (e) {
   console.log('Could not parse hello file: ' + e.message);
   helloMsgs = {
-    'hello': [
-      "hello!"
-    ]
+    hello: ['hello!']
   };
 }
 
@@ -84,7 +83,6 @@ try {
 } catch (e) {
   console.log('Could not parse mattermost configuration file: ' + e.message);
 }
-
 
 // Create Mattermost client
 if (mattermostConfig.hook_url) var mattermostClient = new mattermost(mattermostConfig.hook_url);
@@ -111,13 +109,13 @@ try {
 } catch (e) {
   console.log('Could not parse IRC configuration file: ' + e.message);
   ircConfig = {
-    server: "irc.freenode.net",
-    nick: "Consuela-λspace",
-    channels: ["#LambdaSpace"]
+    server: 'irc.freenode.net',
+    nick: 'Consuela-λspace',
+    channels: ['#LambdaSpace']
   };
 }
 
-var CA = fs.readFileSync(__dirname + "/" + mqttConfig.caFile);
+var CA = fs.readFileSync(__dirname + '/' + mqttConfig.caFile);
 
 var mqttOptions = {
   port: mqttConfig.port,
@@ -137,7 +135,6 @@ try {
 client.on('connect', function() {
   console.log('Connected to MQTT broker ' + mqttConfig.host);
 });
-
 
 // Create an IRC client
 var ircClient = new irc.Client(ircConfig.server, ircConfig.nick, ircConfig);
@@ -192,7 +189,6 @@ var broadcastStatusChange = function(newStatus) {
   if (mattermostBroadcast(msg, '#status-updates')) spaceOpen = newStatus;
 };
 
-
 /**
  * Updates the status of the space, given the number
  * of the hackers there.
@@ -233,21 +229,24 @@ ircClient.addListener('message#LambdaSpace', function(from, message) {
 // });
 
 // Github organization Webhooks
-var gh_webhook_handler = gh_webhook({ 'path': '/lambdaspace', 'secret': APIKeys.github.webhook });
+var gh_webhook_handler = gh_webhook({ path: '/lambdaspace', secret: APIKeys.github.webhook });
 try {
-  http.createServer(function(req, res) {
-    gh_webhook_handler(req, res, function(err) {
-      res.statusCode = 404;
-      res.end('No such location');
-    });
-  }).listen(7777);
+  http
+    .createServer(function(req, res) {
+      gh_webhook_handler(req, res, function(err) {
+        res.statusCode = 404;
+        res.end('No such location');
+      });
+    })
+    .listen(7777);
 } catch (e) {
   console.log(e);
-
 }
 
 gh_webhook_handler.on('push', function(event) {
-  ircClient.sayAllChannels(event.payload.pusher.name + ' pushed to repository ' + event.payload.repository.name + ':');
+  ircClient.sayAllChannels(
+    event.payload.pusher.name + ' pushed to repository ' + event.payload.repository.name + ':'
+  );
   event.payload.commits.forEach(function(commit) {
     var msg = '* ' + commit.author.name + ' - ' + commit.message;
     ircClient.sayAllChannels(msg);
@@ -278,8 +277,6 @@ try {
   console.log(e);
 }
 
-
-
 /* Disclaimer: follows code that is very specific to the LambdaSpace stack */
 
 // Parse events from discourse
@@ -289,6 +286,7 @@ var eventParser = function(topic) {
   event.day = tokens[0];
   if (!event.day.match(/^\d\d\/\d\d\/\d\d\d\d+$/)) {
     console.log('Not in expected format');
+    return;
   }
   var dateTokens = tokens[0].split('/');
   event.date = new Date(dateTokens[2], dateTokens[1] - 1, dateTokens[0], 0, 0);
@@ -297,10 +295,9 @@ var eventParser = function(topic) {
     event.time = tokens[1];
     event.title = topic.substr(17);
   } else {
-    event.time = "";
+    event.time = '';
     event.title = topic.substr(11);
   }
-
   return event;
 };
 
@@ -313,6 +310,7 @@ var parseEvents = function(data) {
     } catch (e) {
       return;
     }
+    if (!event) return;
     var pubEvent = null;
     if (event.date.equals(Date.parse('today'))) {
       pubEvent = 'TODAY ';
