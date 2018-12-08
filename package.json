@@ -38,10 +38,10 @@
     "fs": "0.0.2",
     "github-webhook-handler": "0.6.0",
     "irc": "0.5.2",
-    "mqtt": "^2.13.1",
+    "mqtt": "^2.15.0",
     "node-mattermost": "^0.0.1",
-    "node-schedule": "^1.1.0",
-    "request": "^2.72.0",
+    "node-schedule": "^1.2.5",
+    "request": "^2.84.0",
     "twitter": "1.7.1"
   },
   "devDependencies": {
