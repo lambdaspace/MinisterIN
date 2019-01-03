@@ -41,7 +41,7 @@
     "mqtt": "^2.13.1",
     "node-mattermost": "^0.0.1",
     "node-schedule": "^1.1.0",
-    "request": "^2.72.0",
+    "request": "^2.83.0",
     "twitter": "1.7.1"
   },
   "devDependencies": {
